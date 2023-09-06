@@ -6,6 +6,7 @@ import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
 import MyInput from "./components/UI/input/MyInput";
 import PostForm from "./components/PostForm";
+import MySelect from "./components/UI/select/MySelect";
 
 function App() {
   const [posts, setPosts] = useState([
@@ -14,17 +15,31 @@ function App() {
     {id: 3, title: 'Javascript 3', body: 'Description'},
   ])
 
-  const addNewPost = (e) => {
-    e.preventDefault()
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost])
+  }
 
-    setPosts([...posts, {...post, id: Date.now()}]);
-    setPost({title: '', body: ''});
+  const removePost = (post) => {
+    setPosts(posts.filter(p => p.id !== post.id))
   }
 
   return (
     <div className="App">
-      <PostForm/>
-      <PostList posts={posts} title='Post list 1'/>
+      <PostForm create={createPost}/>
+      <hr style={{margin: '15px 8px'}}/>
+      <div>
+        <MySelect
+          defaultValue= 'Sort'
+          options={[
+            {value: 'title', name: 'By name'},
+            {value: 'body', name: 'By description'},
+          ]}
+        />
+      </div>
+      {posts.length 
+        ? <PostList remove={removePost} posts={posts} title='Post list 1'/>
+        : <h2 style={{textAlign: 'center', color: 'grey'}}>Posts not found</h2>
+      }
     </div>
   )
 }
