@@ -1,5 +1,4 @@
-import React, { useRef, useState } from "react";
-import Counter from "./components/Counter";
+import React, { useMemo, useState } from "react";
 import './styles/app.css'
 import PostItem from "./components/PostItem";
 import PostList from "./components/PostList";
@@ -7,6 +6,7 @@ import MyButton from "./components/UI/button/MyButton";
 import MyInput from "./components/UI/input/MyInput";
 import PostForm from "./components/PostForm";
 import MySelect from "./components/UI/select/MySelect";
+import PostFilter from "./components/PostFilter";
 
 function App() {
   const [posts, setPosts] = useState([
@@ -14,6 +14,21 @@ function App() {
     {id: 2, title: 'Javascript 2', body: 'Description'},
     {id: 3, title: 'Javascript 3', body: 'Description'},
   ])
+
+  const [filter, setFilter] = useState({sort: '', query: ''})
+
+  const sortedPosts = useMemo(() => {
+    if (filter.sort) {
+      return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
+    }
+
+    return posts;
+  }, [filter.sort, posts]);
+
+  const sortedAndSearchedPosts = useMemo(() => {
+
+    return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query))
+  }, [filter.query, sortedPosts])
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost])
@@ -27,17 +42,12 @@ function App() {
     <div className="App">
       <PostForm create={createPost}/>
       <hr style={{margin: '15px 8px'}}/>
-      <div>
-        <MySelect
-          defaultValue= 'Sort'
-          options={[
-            {value: 'title', name: 'By name'},
-            {value: 'body', name: 'By description'},
-          ]}
-        />
-      </div>
-      {posts.length 
-        ? <PostList remove={removePost} posts={posts} title='Post list 1'/>
+      <PostFilter
+        filter={filter}
+        setFilter={setFilter}
+      />
+      {sortedAndSearchedPosts.length 
+        ? <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Post list'/>
         : <h2 style={{textAlign: 'center', color: 'grey'}}>Posts not found</h2>
       }
     </div>
