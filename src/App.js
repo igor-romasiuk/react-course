@@ -25,7 +25,7 @@ function App() {
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
   let pagesArray = getPagesArray(totalPages);
 
-  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async (limit, page) => {
     const response = await PostService.getAll(limit, page)
     setPosts(response.data)
     const totalCount = response.headers['x-total-count'];
@@ -33,7 +33,7 @@ function App() {
   })
 
   useEffect(() => {
-    fetchPosts()
+    fetchPosts(limit, page)
   }, [])
   
   const createPost = (newPost) => {
@@ -43,6 +43,11 @@ function App() {
 
   const removePost = (post) => {
     setPosts(posts.filter(p => p.id !== post.id))
+  }
+
+  const changePage = (page) => {
+    setPage(page)
+    fetchPosts(limit, page)
   }
 
   return (
@@ -68,6 +73,17 @@ function App() {
         ? <div style={{display: 'flex', justifyContent: 'center', marginTop: 50}}><Loader/></div>
         : <PostList remove={removePost} posts={sortedAndSearchedPosts} title='Post list'/>
       }
+      <div className="page__wrapper">
+        {pagesArray.map(p => 
+          <span
+            onClick={() => changePage(p)} 
+            key={p}
+            className={page === p ? 'page page__current' : 'page'}
+          >
+            {p}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
